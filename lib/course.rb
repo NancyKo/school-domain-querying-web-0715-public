@@ -21,10 +21,10 @@ attr_accessor :id, :name, :department_id
 	end
 
 	def insert 
-		sql = """ INSERT INTO courses (name)
-		VALUES (?)"""
-		DB[:conn].execute(sql, name)
-		sql = """SELECT last_insert_rowid() FROM courses"""
+		sql = "INSERT INTO courses (name, department_id)
+		VALUES (?, ?)"
+		DB[:conn].execute(sql, name, department_id)
+		sql = "SELECT last_insert_rowid() FROM courses"
 		@id = DB[:conn].execute(sql)
     self.id = @id.length
 	end
@@ -33,22 +33,53 @@ attr_accessor :id, :name, :department_id
 		new_course = new 
 		new_course.id = row[0]
 		new_course.name = row[1]
+		new_course.department_id = row[2]
 		new_course
 	end
 
 	def self.find_by_name(name)
-		sql = """SELECT * FROM courses WHERE name = ?;"""
-		# binding.pry
+		sql = "SELECT * FROM courses WHERE name = ?;"
 		results = DB[:conn].execute(sql, name)
     results.map {|row| self.new_from_db(row) }.first
 	end
 
 	def self.find_all_by_department_id(department_id)
-		sql = """SELECT * FROM courses WHERE department_id = ?"
-		results	=	DB[:conn].execute(sql, department_id)
-		binding.pry
-		results.map {|row| self.new_from_db(row) }.first
+    sql = "SELECT * FROM courses WHERE department_id = ?;"
+    results = DB[:conn].execute(sql, department_id)
+    results.map {|row| self.new_from_db(row) }
+	end
 
+	def update
+		sql = "UPDATE courses SET name = ?, department_id = ?;"
+		DB[:conn].execute(sql, name, department_id)
+	end 
+
+	def persisted?
+		!!id
+	end
+
+	def save
+		persisted? ? update : insert 
+	end
+
+	def department
+  	#successfully gets department
+  	sql = "SELECT department_id FROM departments;"
+  	@department  = DB[:conn].execute(sql)
+	end
+
+	def department=(department)
+  #set department id when deparment is set
+  	sql = "UPDATE courses SET department_id = ? JOIN departments ON department_id = department.id WHERE id = ?;"
+  	DB[:conn].execute(sql, id)
+	end
+
+	def students
+  #find all students by department_id
+	end
+
+	def add_student(student)
+  #add a student to a particular course and save them
 	end
 
 end
