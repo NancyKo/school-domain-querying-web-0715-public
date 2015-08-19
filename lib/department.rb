@@ -65,14 +65,13 @@ attr_accessor :id, :name
   def courses
     #find all courses by department_id
     sql = """
-    SELECT *
+    SELECT courses.name
     FROM courses
     JOIN departments
     ON departments.id = courses.department_id
     WHERE departments.id = ?;"""
     results = DB[:conn].execute(sql, self.id)
     result = results.map {|row| self.class.new_from_db(row)}
-    binding.pry
   end
 
   def add_course(course)

@@ -74,12 +74,21 @@ attr_accessor :id, :name, :department_id
 
 	def students
   #find all students by department_id
-  Student.find_by_name(name)
+  sql = """SELECT * FROM STUDENTS 
+  				JOIN registrations 
+  				ON registrations.student_id = student.id
+  				JOIN courses
+  				ON registrations.course_id = courses.id
+  				JOIN departments 
+  				ON departments.id = courses.department_id
+  				WHERE department_id = ?; """
+  				DB[:conn].execute(sql, department_id)
 	end
 
 	def add_student(student)
   #add a student to a particular course and save them
-  
+   sql = "INSERT INTO registrations (student_id, course.id ) VALUES (?, ?);"
+    DB[:conn].execute(sql, self.id, student)
 	end
 
 end
