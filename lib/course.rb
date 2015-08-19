@@ -64,22 +64,22 @@ attr_accessor :id, :name, :department_id
 
 	def department
   	#successfully gets department
-  	sql = "SELECT department_id FROM departments;"
-  	@department  = DB[:conn].execute(sql)
+		Department.find_by_id(id)
 	end
 
 	def department=(department)
   #set department id when deparment is set
-  	sql = "UPDATE courses SET department_id = ? JOIN departments ON department_id = department.id WHERE id = ?;"
-  	DB[:conn].execute(sql, id)
+  	self.department_id = department.id
 	end
 
 	def students
   #find all students by department_id
+  Student.find_by_name(name)
 	end
 
 	def add_student(student)
   #add a student to a particular course and save them
+  
 	end
 
 end

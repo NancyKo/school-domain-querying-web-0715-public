@@ -1,3 +1,4 @@
+require 'pry'
 class Department
 attr_accessor :id, :name 
 
@@ -61,12 +62,23 @@ attr_accessor :id, :name
     persisted? ? update : insert 
   end
   
-  def course
+  def courses
     #find all courses by department_id
+    sql = """
+    SELECT *
+    FROM courses
+    JOIN departments
+    ON departments.id = courses.department_id
+    WHERE departments.id = ?;"""
+    results = DB[:conn].execute(sql, self.id)
+    result = results.map {|row| self.class.new_from_db(row)}
+    binding.pry
   end
 
   def add_course(course)
     #add a course to a department and save it
+    sql = "INSERT INTO courses (department_id) VALUES (?);"
+    DB[:conn].execute(sql, self.id)
   end
 
 end
