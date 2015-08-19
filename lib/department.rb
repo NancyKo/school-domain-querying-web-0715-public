@@ -25,7 +25,7 @@ attr_accessor :id, :name
     DB[:conn].execute(sql, name)
     sql = "SELECT last_insert_rowid() FROM departments"
     id = DB[:conn].execute(sql)
-    self.id = id.length
+    self.id = id.flatten.first
   end
 
   def self.new_from_db(row)
@@ -64,20 +64,18 @@ attr_accessor :id, :name
   
   def courses
     #find all courses by department_id
-    sql = """
-    SELECT courses.name
-    FROM courses
-    JOIN departments
-    ON departments.id = courses.department_id
-    WHERE departments.id = ?;"""
-    results = DB[:conn].execute(sql, self.id)
-    result = results.map {|row| self.class.new_from_db(row)}
+    Course.find_all_by_department_id(self.id)
   end
 
   def add_course(course)
-    #add a course to a department and save it
-    sql = "INSERT INTO courses (department_id) VALUES (?);"
-    DB[:conn].execute(sql, self.id)
+  #   #add a course to a department and save it
+    course.department_id = self.id
+    sql = """ INSERT INTO courses (name, department_id) VALUES (?, ?);"""
+    DB[:conn].execute(sql, "#{course.name}", "#{course.department_id}")
+    # binding.pry
+    # course.save
+    self.save
+
   end
 
 end

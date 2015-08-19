@@ -25,8 +25,9 @@ attr_accessor :id, :name, :department_id
 		VALUES (?, ?)"
 		DB[:conn].execute(sql, name, department_id)
 		sql = "SELECT last_insert_rowid() FROM courses"
-		@id = DB[:conn].execute(sql)
-    self.id = @id.length
+		id = DB[:conn].execute(sql)
+    self.id = id.flatten.first
+    # binding.pry
 	end
 
 	def self.new_from_db(row)
@@ -74,21 +75,23 @@ attr_accessor :id, :name, :department_id
 
 	def students
   #find all students by department_id
-  sql = """SELECT * FROM STUDENTS 
-  				JOIN registrations 
-  				ON registrations.student_id = student.id
-  				JOIN courses
-  				ON registrations.course_id = courses.id
-  				JOIN departments 
-  				ON departments.id = courses.department_id
-  				WHERE department_id = ?; """
-  				DB[:conn].execute(sql, department_id)
+  sql = "SELECT * FROM STUDENTS; "
+  	DB[:conn].execute(sql).map {|row| Student.new_from_db(row)}
+
 	end
 
 	def add_student(student)
   #add a student to a particular course and save them
-   sql = "INSERT INTO registrations (student_id, course.id ) VALUES (?, ?);"
-    DB[:conn].execute(sql, self.id, student)
+   # sql = "INSERT INTO registrations (students.id, course.id )
+   # JOIN departments ON department_id = departments.id 
+   # JOIN students ON students.id = student_id 
+   # VALUES (?, ?);"
+   #  DB[:conn].execute(sql, students.id, self.id)
+   # r = Registration.new
+   # r.course_id = self.id
+   # r.student_id = student.id
+   # r.save
+   student.add_course(self)
 	end
 
 end
